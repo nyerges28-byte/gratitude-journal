@@ -1,0 +1,1028 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Gratitude Journal</title>
+<meta name="description" content="Write down ten things you're grateful for every day.">
+<meta name="theme-color" content="#F3F1EC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#11171A" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Gratitude">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&display=swap">
+<style>
+html{-webkit-text-size-adjust:100%;color-scheme:light}
+body{margin:0;font-size:14px}
+img{max-width:100%}
+[hidden]{display:none!important}
+:root{padding-top:env(safe-area-inset-top,0px)}
+/* Layout: one calm column — a breathing level ring, a soft "machine" card with frosted reels and glowing pebbles for today's 10; tab bar at the thumb. Zen dusk tokens: mist, sage, lavender, peach; the game stays, the noise goes. */
+:root{
+  --bg:#F3F1EC; --card:#FFFFFF; --fg:#2C3833; --muted:#66736D; --line:#E3E0D8;
+  --accent:#3F7464; --on-accent:#16130F;
+  --g1:#9CC2B2; --g2:#C3B5E0; --g3:#EFC3B0;
+  --good:#3F7464; --warn:#9A6A2E; --danger:#A8483A;
+  --reel:#EEF2EF; --reel-fg:#3F7464; --shadow:rgba(44,56,51,.10);
+  --marquee:"Fraunces", Georgia, "Times New Roman", serif;
+  --display:"Fraunces", Georgia, "Times New Roman", serif;
+  --body:"Nunito Sans", -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11171A; --card:#192125; --fg:#E7ECE8; --muted:#9DAAA4; --line:#29333A;
+    --accent:#9CCBB8; --on-accent:#16130F;
+    --g1:#86BBA7; --g2:#AE9FD8; --g3:#E5AE9E;
+    --good:#9CCBB8; --warn:#E3B062; --danger:#E89A8C; --reel:#222D33; --reel-fg:#BFE3D3; --shadow:rgba(0,0,0,.35); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11171A; --card:#192125; --fg:#E7ECE8; --muted:#9DAAA4; --line:#29333A;
+  --accent:#9CCBB8; --on-accent:#16130F;
+  --g1:#86BBA7; --g2:#AE9FD8; --g3:#E5AE9E;
+  --good:#9CCBB8; --warn:#E3B062; --danger:#E89A8C; --reel:#222D33; --reel-fg:#BFE3D3; --shadow:rgba(0,0,0,.35); color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.55;-webkit-text-size-adjust:100%}
+body::after{content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none;background:radial-gradient(40% 30% at 20% 10%, color-mix(in srgb,var(--g1) 30%,transparent), transparent 70%),radial-gradient(35% 28% at 85% 20%, color-mix(in srgb,var(--g2) 28%,transparent), transparent 70%),radial-gradient(40% 30% at 60% 95%, color-mix(in srgb,var(--g3) 22%,transparent), transparent 70%);filter:blur(10px);animation:drift 28s ease-in-out infinite alternate}
+@keyframes drift{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(-3%,2%,0) scale(1.06)}}
+.wrap{max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 124px;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--display);font-weight:500;margin:0;text-wrap:balance;line-height:1.15}
+h2{font-size:1.7rem;font-weight:400}
+h3{font-size:1.12rem}
+p{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:.86rem}
+.num{font-variant-numeric:tabular-nums}
+.eyebrow{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.gold{background:linear-gradient(100deg,color-mix(in srgb,var(--g1) 70%,var(--accent)),color-mix(in srgb,var(--g2) 70%,var(--accent)) 55%,color-mix(in srgb,var(--g3) 75%,var(--accent)));-webkit-background-clip:text;background-clip:text;color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* player bar: breathing level ring, points, streak */
+.player{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center}
+.lvl{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--accent) var(--lvp,0%),var(--line) 0);position:relative;animation:breathe 8s ease-in-out infinite}
+.lvl::before{content:"";position:absolute;inset:-6px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--g1) 45%,transparent),transparent 70%);z-index:-1}
+.lvl::after{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--card)}
+.lvl b{position:relative;z-index:1;font-family:var(--marquee);font-weight:500;font-size:1.2rem;line-height:1}
+.lvl small{position:absolute;bottom:-9px;z-index:2;font-size:.58rem;font-weight:800;letter-spacing:.1em;background:var(--card);color:var(--accent);border:1px solid var(--line);padding:1px 7px;border-radius:99px}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.pts{min-width:0}
+.pts b{font-family:var(--marquee);font-weight:500;font-size:1.6rem;line-height:1.1;display:block;color:var(--fg)}
+.flame{display:flex;align-items:center;gap:8px;background:color-mix(in srgb,var(--card) 80%,transparent);border:1px solid var(--line);border-radius:99px;padding:6px 14px 6px 10px;box-shadow:0 6px 18px -10px var(--shadow)}
+.flame svg{width:22px;height:22px}
+.flame b{font-family:var(--marquee);font-weight:500;font-size:1.2rem;line-height:1}
+.flame span{font-size:.72rem;font-weight:700;color:var(--muted)}
+
+/* the machine, softened */
+.machine{position:relative;border-radius:28px;padding:1px;background:linear-gradient(140deg,var(--g1),var(--g2) 50%,var(--g3));box-shadow:0 24px 60px -30px color-mix(in srgb,var(--g2) 70%,transparent),0 2px 10px -4px var(--shadow)}
+.machine-in{background:color-mix(in srgb,var(--card) 94%,transparent);border-radius:27px;padding:20px;display:flex;flex-direction:column;gap:16px}
+.mhead{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.daycount{font-family:var(--marquee);font-weight:400;font-size:2.4rem;line-height:1.05;letter-spacing:-.01em}
+.odo{display:flex;align-items:center;gap:4px}
+.odo .lab{font-family:var(--marquee);font-style:italic;font-size:1rem;color:var(--muted);margin-right:6px}
+.digit{width:1.05em;height:1.5em;overflow:hidden;border-radius:10px;background:var(--reel);font-family:var(--marquee);font-weight:500;font-size:1.45rem;color:var(--reel-fg);box-shadow:inset 0 2px 6px var(--shadow),inset 0 -1px 0 color-mix(in srgb,#fff 40%,transparent)}
+.digit span{display:flex;flex-direction:column;transition:transform 1.1s cubic-bezier(.22,1,.36,1)}
+.digit span i{height:1.5em;display:grid;place-items:center;font-style:normal;line-height:1}
+.comma{font-family:var(--marquee);font-size:1.3rem;color:var(--muted);align-self:flex-end}
+.prefix{font-family:var(--display);font-weight:400;font-style:italic;font-size:1.35rem}
+.entryrow{display:flex;flex-direction:row;gap:10px;align-items:flex-end}
+.entryrow textarea,.item textarea{width:100%;min-width:0;border:1px solid var(--line);background:var(--bg);border-radius:18px;padding:14px 16px;font-size:1.1rem;line-height:1.45;resize:none;overflow:hidden;min-height:3.3em;field-sizing:content;font-family:var(--body)}
+.item textarea{font-size:1rem;border-radius:12px;padding:8px 10px;min-height:2.6em}
+.entryrow textarea:focus,.item textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 4px color-mix(in srgb,var(--g1) 30%,transparent)}
+.entryrow textarea{flex:1}
+.entryrow .go{padding:0 20px;height:3.3em;min-height:56px;flex:none}
+.go{border:0;border-radius:18px;padding:0 22px;font-family:var(--display);font-weight:600;font-size:1.05rem;color:var(--on-accent);background:linear-gradient(140deg,var(--g1),var(--g2) 55%,var(--g3));box-shadow:0 10px 26px -12px color-mix(in srgb,var(--g2) 90%,transparent);transition:transform .2s ease,box-shadow .2s ease}
+.go:hover{transform:translateY(-1px)}
+.go:active{transform:scale(.97)}
+.go:disabled{opacity:.5;cursor:default}
+.meta{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.bulbs{display:grid;grid-template-columns:repeat(10,1fr);gap:8px}
+.bulb{aspect-ratio:1;border-radius:50%;background:var(--reel);box-shadow:inset 0 1px 3px var(--shadow);max-width:100%;transition:background .6s ease,box-shadow .6s ease,transform .6s ease}
+.bulb.on{background:radial-gradient(circle at 35% 30%,#fff,var(--g1) 55%,color-mix(in srgb,var(--g1) 70%,var(--g2)));box-shadow:0 0 14px color-mix(in srgb,var(--g1) 70%,transparent)}
+.bulb.new{animation:bloom .9s cubic-bezier(.22,1,.36,1)}
+.bulbs.chase .bulb{animation:glowpulse 4s ease-in-out infinite}
+.bulbs.chase .bulb:nth-child(2n){animation-delay:2s}
+@keyframes bloom{0%{transform:scale(.6)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes glowpulse{0%,100%{box-shadow:0 0 6px color-mix(in srgb,var(--g1) 50%,transparent)}50%{box-shadow:0 0 18px color-mix(in srgb,var(--g2) 80%,transparent)}}
+.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--g1),var(--g2),var(--g3));border-radius:99px}
+.banner{border-radius:20px;padding:14px 16px;background:linear-gradient(140deg,color-mix(in srgb,var(--g1) 45%,var(--card)),color-mix(in srgb,var(--g2) 45%,var(--card)) 55%,color-mix(in srgb,var(--g3) 45%,var(--card)));color:var(--fg);display:flex;flex-direction:column;gap:2px}
+.banner strong{font-family:var(--display);font-weight:500;font-style:italic;font-size:1.2rem}
+
+/* lotus, echo, road */
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.top>div:first-child{min-width:0}
+.top .flame{flex:none}
+.lotus{width:min(200px,60vw);height:auto;aspect-ratio:1;display:block;margin:0 auto;overflow:visible}
+.lotus .petal{fill:color-mix(in srgb,var(--g1) 14%,var(--card));stroke:color-mix(in srgb,var(--g2) 45%,var(--line));stroke-width:1.2;transition:fill .6s ease}
+.lotus .petal.on{fill:url(#petg);stroke:color-mix(in srgb,var(--g2) 55%,transparent)}
+.lotus .petal.new{transform-box:view-box;transform-origin:100px 100px;animation:petal 1s cubic-bezier(.22,1,.36,1)}
+.lotus .s1{stop-color:var(--g1)} .lotus .s2{stop-color:var(--g2)} .lotus .s3{stop-color:var(--g3)}
+.lotus .core{fill:var(--card);stroke:var(--line)}
+.lotus .ln{font-family:var(--display);font-size:24px;text-anchor:middle;dominant-baseline:middle;fill:var(--fg)}
+.lotus .ls{font-family:var(--body);font-size:8px;font-weight:800;letter-spacing:.12em;text-anchor:middle;fill:var(--muted)}
+.lotus.full{animation:bloomglow 6s ease-in-out infinite}
+@keyframes petal{from{transform:scale(.25);opacity:0}to{transform:none;opacity:1}}
+@keyframes bloomglow{0%,100%{filter:drop-shadow(0 0 3px color-mix(in srgb,var(--g2) 40%,transparent));transform:scale(1)}50%{filter:drop-shadow(0 0 16px color-mix(in srgb,var(--g1) 75%,transparent));transform:scale(1.03)}}
+.echo{display:flex;gap:12px;align-items:flex-start;background:color-mix(in srgb,var(--g1) 14%,var(--card));border:1px solid color-mix(in srgb,var(--g1) 40%,var(--line));border-radius:18px;padding:12px 14px;animation:rise .8s cubic-bezier(.22,1,.36,1)}
+.echo>div{display:flex;flex-direction:column;gap:2px;min-width:0;align-items:flex-start}
+.echo-ic{font-size:1.3rem;line-height:1.2;color:var(--accent)}
+.echo .link{padding:2px 0}
+.trail{position:relative;height:10px;border-radius:99px;background:var(--line)}
+.trail i{position:absolute;inset:0 auto 0 0;border-radius:99px;background:linear-gradient(90deg,var(--g1),var(--g2),var(--g3))}
+.trail b{position:absolute;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;background:var(--card);border:3px solid var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--g1) 30%,transparent)}
+
+/* lists */
+.list{display:flex;flex-direction:column}
+.item{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:baseline;padding:13px 2px;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:0}
+.item .n{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.85rem;min-width:3.2em;font-weight:600}
+.item .t{min-width:0;overflow-wrap:anywhere}
+.item .t em{font-style:italic;font-family:var(--display);color:var(--muted)}
+.wcs{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.wc{border:1px solid var(--line);background:color-mix(in srgb,var(--g1) 14%,var(--card));border-radius:99px;padding:2px 9px;font-size:.74rem;font-weight:700;color:var(--fg);line-height:1.6}
+.wc b{color:var(--accent);font-weight:800;margin-left:2px}
+.wc:hover{border-color:var(--accent)}
+.item .acts{display:flex;gap:4px;position:relative;align-items:center}
+.more{background:none;border:0;width:34px;height:30px;border-radius:10px;color:var(--muted);font-size:1.25rem;line-height:1;letter-spacing:1px;display:grid;place-items:center}
+.more:hover,.more[aria-expanded="true"]{background:var(--line);color:var(--fg)}
+.menu{position:absolute;right:0;top:calc(100% + 4px);z-index:8;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 34px var(--shadow);padding:4px;display:flex;flex-direction:column;min-width:130px}
+.menu button{background:none;border:0;text-align:left;padding:10px 12px;border-radius:10px;font-weight:600;font-size:.92rem;color:var(--fg)}
+.menu button:hover{background:var(--bg)}
+.menu button.danger{color:var(--danger)}
+.item input{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:6px 8px}
+.link{background:none;border:0;padding:4px 6px;color:var(--accent);font-weight:700;font-size:.85rem;border-radius:6px}
+.link.danger{color:var(--danger)}
+mark{background:color-mix(in srgb,var(--g1) 40%,transparent);color:inherit;border-radius:3px}
+
+.panel{background:color-mix(in srgb,var(--card) 92%,transparent);border:1px solid var(--line);border-radius:24px;padding:18px;display:flex;flex-direction:column;gap:14px;box-shadow:0 10px 30px -22px var(--shadow)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.chip{flex:none;border:1px solid var(--line);background:var(--card);border-radius:99px;padding:6px 12px;font-size:.85rem;font-variant-numeric:tabular-nums;font-weight:600}
+.chip[aria-pressed="true"]{background:linear-gradient(140deg,var(--g1),var(--g2));border-color:transparent;color:var(--on-accent)}
+.search{width:100%;border:1px solid var(--line);background:var(--card);border-radius:18px;padding:12px 16px}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:10px 14px;font-weight:700}
+.btn.primary{border:0;background:linear-gradient(140deg,var(--g1),var(--g2) 55%,var(--g3));color:var(--on-accent)}
+.btn.danger{border-color:var(--danger);color:var(--danger)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* progress */
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:24px;overflow:hidden}
+.stat{background:var(--card);padding:16px;display:flex;flex-direction:column;gap:4px}
+.stat b{font-family:var(--marquee);font-weight:400;font-size:2rem;line-height:1.05;font-variant-numeric:tabular-nums}
+.bars{position:relative;height:130px;margin-top:20px;display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:5px;align-items:end;border-bottom:1px solid var(--line)}
+.bars .col{height:100%;display:flex;align-items:flex-end;justify-content:center;min-width:0}
+.bars .b{position:relative;width:100%;max-width:20px;min-height:3px;border-radius:8px 8px 3px 3px;background:color-mix(in srgb,var(--g2) 40%,var(--line));transition:height .8s cubic-bezier(.22,1,.36,1)}
+.bars .b.full{background:linear-gradient(180deg,var(--g2),var(--g1))}
+.bars .b.zero{background:var(--line)}
+.bars .b span{position:absolute;bottom:calc(100% + 3px);left:50%;transform:translateX(-50%);font-size:.7rem;font-weight:800;color:var(--fg);font-variant-numeric:tabular-nums;white-space:nowrap}
+.bars .b.zero span{color:var(--muted);font-weight:600}
+.bars .col.today .b{box-shadow:0 0 0 2px var(--card),0 0 0 3.5px var(--accent)}
+.goal-line{position:absolute;left:0;right:0;border-top:1.5px dashed color-mix(in srgb,var(--accent) 65%,transparent);pointer-events:none;z-index:1}
+.goal-line span{position:absolute;left:0;bottom:3px;font-size:.62rem;font-weight:800;color:var(--accent);background:var(--card);padding:0 3px;border-radius:4px}
+.dlabels{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:5px;margin-top:6px;text-align:center}
+.dlabels span{font-size:.62rem;color:var(--muted);line-height:1.25;font-weight:700;min-width:0}
+.dlabels span.today{color:var(--accent)}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:12px}
+.badge{aspect-ratio:1;border-radius:50%;border:1.5px dashed var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);max-width:100%}
+.badge b{font-family:var(--marquee);font-weight:500;font-size:1.1rem;font-variant-numeric:tabular-nums}
+.badge span{font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.badge.got{border:0;background:radial-gradient(circle at 35% 30%,color-mix(in srgb,#fff 50%,var(--g1)),var(--g1) 45%,var(--g2) 80%,var(--g3));color:var(--on-accent);box-shadow:0 8px 22px -10px color-mix(in srgb,var(--g2) 90%,transparent)}
+
+/* settings */
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-weight:700;font-size:.9rem}
+.field input,.field select,.field textarea{border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:10px 12px;max-width:100%}
+.field textarea{min-height:140px;resize:vertical}
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px}
+.sw{border:2px solid var(--line);border-radius:16px;padding:10px;background:var(--card);display:flex;flex-direction:column;gap:8px;text-align:left;font-size:.85rem;font-weight:700}
+.sw[aria-pressed="true"]{border-color:var(--accent)}
+.sw span{height:22px;border-radius:8px;display:block}
+.colors{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.colors label{display:flex;align-items:center;gap:8px;font-size:.85rem;font-weight:700}
+.colors input[type=color]{width:40px;height:32px;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--card)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:12px;overflow:hidden;flex-wrap:wrap}
+.seg button{border:0;background:var(--card);padding:8px 14px;font-weight:700;font-size:.9rem}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--card)}
+.note{border-left:3px solid var(--warn);padding:6px 10px;font-size:.88rem}
+.notice{font-size:.85rem;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+
+/* tab bar */
+.tabs{position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--card) 82%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px);z-index:5}
+.tabs div{display:grid;grid-template-columns:repeat(4,1fr);width:100%;max-width:560px}
+.tabs button{border:0;background:none;padding:12px 4px 14px;font-size:.78rem;font-weight:700;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:4px}
+.tabs button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6}
+.tabs button[aria-current="page"]{color:var(--accent)}
+
+/* the reels, frosted */
+.slot{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translate(-50%,150%);opacity:0;width:min(340px,calc(100% - 32px));z-index:25;border-radius:26px;padding:1px;background:linear-gradient(140deg,var(--g1),var(--g2) 50%,var(--g3));box-shadow:0 30px 60px -20px var(--shadow);transition:transform .6s cubic-bezier(.22,1,.36,1),opacity .6s ease}
+.slot.show{transform:translate(-50%,0);opacity:1}
+.slot-in{background:color-mix(in srgb,var(--card) 96%,transparent);border-radius:25px;padding:16px;display:flex;flex-direction:column;gap:10px;align-items:center}
+.reels{display:flex;gap:10px}
+.reel{width:64px;height:72px;overflow:hidden;border-radius:18px;background:var(--reel);box-shadow:inset 0 3px 10px var(--shadow)}
+.reel .strip{display:flex;flex-direction:column}
+.reel .strip i{height:72px;display:grid;place-items:center;font-style:normal;font-size:2rem;line-height:1;color:var(--reel-fg)}
+.reel .strip i.lotus{color:color-mix(in srgb,var(--g3) 55%,var(--reel-fg))}
+.payout{font-family:var(--display);font-size:1.15rem;min-height:1.4em;text-align:center}
+.payout .win{font-style:italic;color:var(--accent)}
+.payout small{display:block;font-family:var(--body);font-size:.78rem;font-weight:700;color:var(--muted)}
+
+/* celebration */
+.celebrate{position:fixed;inset:0;display:grid;place-items:center;background:color-mix(in srgb,var(--bg) 55%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:40;padding:24px}
+.celebrate .box{position:relative;border-radius:30px;padding:1px;background:linear-gradient(140deg,var(--g1),var(--g2) 50%,var(--g3));max-width:340px;width:100%;animation:rise .8s cubic-bezier(.22,1,.36,1);box-shadow:0 30px 70px -20px var(--shadow)}
+.celebrate .box>div{background:var(--card);border-radius:29px;padding:30px 22px;text-align:center;display:flex;flex-direction:column;gap:10px}
+.celebrate .big{font-family:var(--marquee);font-size:3rem;line-height:1}
+.celebrate .jack{font-family:var(--marquee);font-style:italic;font-weight:400;font-size:2.4rem;line-height:1}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:45}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:99px;font-size:.9rem;font-weight:600;z-index:30;max-width:calc(100% - 32px)}
+@keyframes pop{from{transform:scale(.9);opacity:.5}to{transform:none;opacity:1}}
+@keyframes rise{from{transform:translateY(16px) scale(.96);opacity:0}to{transform:none;opacity:1}}
+@keyframes glow{0%,100%{opacity:1}50%{opacity:.6}}
+.glow{animation:glow 2.4s ease-in-out 2}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap" id="app" aria-live="polite">
+  <div class="notice" id="loading">Opening your journal…</div>
+</main>
+<nav class="tabs" aria-label="Sections"><div>
+  <button data-tab="today" aria-current="page"><svg viewBox="0 0 24 24"><path d="M4 20h16M6 16l9.5-9.5a2.1 2.1 0 0 1 3 3L9 19H6z"/></svg>Today</button>
+  <button data-tab="browse"><svg viewBox="0 0 24 24"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/></svg>Browse</button>
+  <button data-tab="progress"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Progress</button>
+  <button data-tab="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</button>
+</div></nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.9"></script>
+<script>
+// CORE-START
+const PRESETS = {
+  zen:     {name:"Zen Dusk",   light:{bg:"#F3F1EC",card:"#FFFFFF",fg:"#2C3833",muted:"#66736D",line:"#E3E0D8",accent:"#3F7464",g:["#9CC2B2","#C3B5E0","#EFC3B0"]},
+                               dark:{bg:"#11171A",card:"#192125",fg:"#E7ECE8",muted:"#9DAAA4",line:"#29333A",accent:"#9CCBB8",g:["#86BBA7","#AE9FD8","#E5AE9E"]}},
+  jackpot: {name:"Casino Night",   light:{bg:"#FFF7E8",card:"#FFFFFF",fg:"#1D1A22",muted:"#6B6475",line:"#EEDFC2",accent:"#9A5B05",g:["#A15C07","#C2410C","#BE185D"]},
+                               dark:{bg:"#0B0E14",card:"#141925",fg:"#F5EFE0",muted:"#9CA3B4",line:"#262D3D",accent:"#F5C451",g:["#F7D774","#F59E0B","#F472B6"]}},
+  slate:   {name:"Slate Sage", light:{bg:"#F3EEE6",card:"#FBF8F3",fg:"#3B2F28",muted:"#7A6A5E",line:"#E2D9CC",accent:"#5B7083",g:["#5B7083","#5B795B","#8D6E63"]},
+                               dark:{bg:"#1E1A17",card:"#2A2420",fg:"#EFE6DA",muted:"#B3A496",line:"#3A322C",accent:"#8FA6BA",g:["#8FA6BA","#8DB08D","#B39182"]}},
+  forest:  {name:"Forest",     light:{bg:"#EEF0E8",card:"#F8F9F4",fg:"#26321F",muted:"#66705C",line:"#D9DECF",accent:"#4E7A4A",g:["#3F6B45","#5B795B","#6C755C"]},
+                               dark:{bg:"#151A14",card:"#1F261D",fg:"#E3EAD9",muted:"#A2AE95",line:"#2F382C",accent:"#8DB08D",g:["#7FA884","#8DB08D","#B5C29C"]}},
+  ocean:   {name:"Ocean",      light:{bg:"#EAF0F2",card:"#F7FAFB",fg:"#1E3340",muted:"#5E7280",line:"#D3DEE3",accent:"#3D6F8C",g:["#2F5F7A","#437C83","#587B7A"]},
+                               dark:{bg:"#111A20",card:"#1A262E",fg:"#DCE8EE",muted:"#93A8B4",line:"#28363F",accent:"#7FB0CC",g:["#6FA3C0","#6FB0B6","#9CCBC8"]}},
+  sand:    {name:"Sand",       light:{bg:"#F4ECDF",card:"#FCF7EF",fg:"#4A3524",muted:"#86705C",line:"#E6D8C4",accent:"#8A5E3B",g:["#906C46","#8B6F4B","#8D6E63"]},
+                               dark:{bg:"#1F1913",card:"#2B231B",fg:"#F1E4D1",muted:"#BBA68D",line:"#3B3026",accent:"#D2A777",g:["#D2A777","#E0BE8A","#B39182"]}},
+  midnight:{name:"Midnight",   light:{bg:"#E9EAF0",card:"#F6F6FA",fg:"#22243A",muted:"#62657E",line:"#D5D7E2",accent:"#4B5590",g:["#3E4A85","#5B7083","#5B795B"]},
+                               dark:{bg:"#10121C",card:"#1A1D2B",fg:"#E1E3F0",muted:"#9DA1BC",line:"#292D40",accent:"#96A0E0",g:["#8A95D8","#8FA6BA","#8DB08D"]}},
+};
+
+function milestoneList(upTo){
+  const out=[]; for(let v=1000; v<=10000; v+=1000) out.push(v);
+  for(let v=20000; v<=Math.max(20000,upTo+10000); v+=10000) out.push(v);
+  return out;
+}
+function nextMilestone(total){ return milestoneList(total).find(v=>v>total); }
+function crossed(before, after){ return milestoneList(after).filter(v=>v>before && v<=after); }
+
+function dayNum(iso){ const [y,m,d]=iso.split("-").map(Number); return Math.round(Date.UTC(y,m-1,d)/86400000); }
+function isoFromNum(n){ return new Date(n*86400000).toISOString().slice(0,10); }
+function addDays(iso,k){ return isoFromNum(dayNum(iso)+k); }
+
+function computeStats(dayCounts, today, goal, rule){
+  // dayCounts: {iso: count}
+  const need = rule==="goal" ? goal : 1;
+  const ok = iso => (dayCounts[iso]||0) >= need;
+  let cur=0, d = ok(today) ? today : addDays(today,-1);
+  while(ok(d)){ cur++; d=addDays(d,-1); }
+  const qual = Object.keys(dayCounts).filter(ok).map(dayNum).sort((a,b)=>a-b);
+  let best=0, run=0, prev=null;
+  for(const n of qual){ run = (prev!==null && n===prev+1) ? run+1 : 1; best=Math.max(best,run); prev=n; }
+  const days = Object.values(dayCounts).filter(c=>c>0).length;
+  const full = Object.values(dayCounts).filter(c=>c>=goal).length;
+  return {current:cur, best:Math.max(best,cur), days, full};
+}
+function dayCounter(startIso, today){ return dayNum(today)-dayNum(startIso)+1; }
+
+function parseImport(text){
+  return text.split(/\r?\n/).map(l=>l.trim())
+    .map(l=>l.replace(/^(#?\d[\d,]*\s*[.):\-–]\s*|#\d[\d,]*\s+|[-*•]\s+)/,""))
+    .map(l=>l.replace(/^i\s*(am|'m)\s+(so\s+)?(grateful|thankful)\s+(for\s+)?/i,""))
+    .map(l=>l.replace(/^[,:\-–\s]+/,"").trim())
+    .filter(l=>l.length>0);
+}
+
+// docs model: profile, m-YYYY-MM {days:{iso:[{n,t,at}]}}, imp-0000 {items:[{n,t}]}
+function flatten(docs){
+  const all=[];
+  for(const [id,d] of Object.entries(docs)){
+    if(id.startsWith("m-") && d && d.days){
+      for(const [iso,items] of Object.entries(d.days)) for(const it of items||[]) all.push({n:it.n,t:it.t,date:iso,at:it.at||0,src:"app",p:it.p,k:it.k});
+    } else if(id.startsWith("imp-") && d && d.items){
+      for(const it of d.items) all.push({n:it.n,t:it.t,date:it.d||null,src:"imp",chunk:id});
+    }
+  }
+  all.sort((a,b)=>a.n-b.n);
+  return all;
+}
+function shiftedDocs(docs, k){
+  // returns {id: newBody} for every app month doc with numbers shifted by k
+  const out={};
+  for(const [id,d] of Object.entries(docs)){
+    if(id.startsWith("m-") && d && d.days){
+      const days={}; for(const [iso,items] of Object.entries(d.days)) days[iso]=(items||[]).map(it=>({...it,n:it.n+k}));
+      out[id]={days};
+    }
+  }
+  return out;
+}
+// Game layer: every entry pulls the lever. Points are stored on each entry (p),
+// imported entries count 10 each, and nothing here can be bought.
+const SYMBOLS=["✿","☾","☀\uFE0E","❀","✦","❁"];   // index 5 = lotus, the top prize
+function multiplier(streak){ return Math.round((1+Math.min(Math.max(streak,0),50)/50)*10)/10; }  // x1.0 → x2.0 at a 50-day streak
+function totalPoints(all){ return all.reduce((a,e)=>a+(typeof e.p==="number"?e.p:10),0); }
+function levelInfo(points){ const level=Math.floor(Math.sqrt(points/50))+1; const cur=50*(level-1)**2, next=50*level**2; return {level, into:points-cur, need:next-cur, pct:(points-cur)/(next-cur), next}; }
+function spin(rand=Math.random){
+  const r=rand(); let reels, kind;
+  if(r<0.015){ reels=[5,5,5]; kind="mega"; }
+  else if(r<0.09){ const x=Math.floor(rand()*5); reels=[x,x,x]; kind="jackpot"; }
+  else if(r<0.45){ const x=Math.floor(rand()*6); let o; do{ o=Math.floor(rand()*6); }while(o===x); reels=[x,x,x]; reels[Math.floor(rand()*3)]=o; kind="pair"; }
+  else { const pool=[0,1,2,3,4,5]; reels=[]; for(let i=0;i<3;i++) reels.push(pool.splice(Math.floor(rand()*pool.length),1)[0]); kind="none"; }
+  return {reels, kind, bonus:{mega:500,jackpot:100,pair:25,none:0}[kind]};
+}
+const GOAL_BONUS=250;
+// Word counts: how many entries mention each word ("Amelia", "health", "life").
+const STOPWORDS=new Set(("the and for our with that this from have has had was were are been being will would could should into onto about after before over under again very just also more most some such than then them they their there these those what when where which while who whom whose why how all any both each few other own same can not only too out off once here day days today yesterday tomorrow tonight morning evening night getting having being able much many lot lots thing things good great nice really day's grateful thankful gratitude journal list its it's i'm i've you your yours his her hers him she he we us me my mine myself").split(" "));
+function wordKey(tok){ return tok.toLowerCase().replace(/[’]/g,"'").replace(/'s$/,"").replace(/'$/,"").replace(/-+$/,""); }
+function tokens(text){ return (text.match(/[A-Za-z][A-Za-z'’-]{2,}/g)||[]).map(t=>({raw:t.replace(/['’]s$/,"").replace(/['’-]+$/,""),key:wordKey(t)})).filter(t=>t.key.length>=3&&!STOPWORDS.has(t.key)); }
+function buildWordIndex(all){ const m=new Map(); for(const e of all){ const seen=new Set(); for(const t of tokens(e.t)){ if(seen.has(t.key)) continue; seen.add(t.key); m.set(t.key,(m.get(t.key)||0)+1); } } return m; }
+function topWordsIn(text, index, max=2, min=3){
+  const seen=new Set(), out=[];
+  for(const t of tokens(text)){ if(seen.has(t.key)) continue; seen.add(t.key); const c=index.get(t.key)||0; if(c>=min) out.push({word:t.raw,key:t.key,count:c}); }
+  return out.sort((a,b)=>b.count-a.count).slice(0,max);
+}
+// Rewards: an "echo" of your own history after each entry, and the road to 10,000.
+function ordinal(n){ const sfx=["th","st","nd","rd"], v=n%100; return n.toLocaleString("en-US")+(sfx[(v-20)%10]||sfx[v]||sfx[0]); }
+function echoFor(text, all){            // all includes the new entry
+  const idx=buildWordIndex(all); const top=topWordsIn(text, idx, 1, 1)[0]; if(!top) return null;
+  const first=all.find(e=>tokens(e.t).some(t=>t.key===top.key));
+  return {word:top.word, key:top.key, count:top.count, first:first?{n:first.n,t:first.t}:null};
+}
+function roadTo(total, dayCounts, today){
+  const target = total<10000 ? 10000 : Math.ceil((total+1)/10000)*10000;
+  let sum=0; for(let i=0;i<30;i++) sum+=dayCounts[addDays(today,-i)]||0;
+  const pace=sum/30, remaining=target-total;
+  return {target, remaining, pace, eta: pace>0 ? addDays(today, Math.ceil(remaining/pace)) : null};
+}
+// First letter: lowercase unless the first word is a name you always capitalize
+// (decided by how that word appears elsewhere in your own entries).
+function smartLower(text, all){
+  const m=text.match(/^([A-Z][A-Za-z]*)/); if(!m) return text;
+  const w=m[1];
+  if(w==="I"||(w.length>1&&w===w.toUpperCase())) return text;                       // "I", "I'm", "NYC"
+  if(/^[A-Z][A-Za-z]*\s+[A-Z]/.test(text)) return text;                              // "Sleepy Hollow", "Life Time"
+  const lower=w[0].toLowerCase()+w.slice(1);
+  const re=new RegExp("(^|[^A-Za-z])("+w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"|"+lower.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")(?![A-Za-z])","g");
+  let cap=0, low=0;
+  for(const e of all){ const t=e.t||""; let x; re.lastIndex=0;
+    while((x=re.exec(t))){ const at=x.index+x[1].length; if(at===0) continue; if(x[2]===w) cap++; else low++; } }
+  return cap>low ? text : lower+text.slice(w.length);
+}
+// CORE-END
+
+/* ---------- account & storage (Supabase) ---------- */
+const SUPABASE_URL="https://eribqzvxavpzdfnmlcnv.supabase.co";
+const SUPABASE_KEY="sb_publishable_NTpuXE8SACwPEYh6IAqV7g_VwErNLVd";   // public by design; privacy comes from row-level security
+const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {auth:{persistSession:true, autoRefreshToken:true, detectSessionInUrl:true}}) : null;
+let session=null, ENTRIES=[], PROFILE=null, ready=false, recovery=false;
+let authMode="signin", authMsg="", authBusy=false;
+
+const tzNow=()=>new Date().toLocaleDateString("en-CA");
+const COLS="id,number,text,local_date,source";
+function rowToEntry(r){ return {id:r.id, n:r.number, t:r.text, date:r.local_date, src:r.source==="import"?"imp":"app"}; }
+async function loadAll(){
+  const out=[], size=1000;
+  for(let from=0;;from+=size){
+    const {data,error}=await sb.from("entries").select(COLS).is("deleted_at",null).order("number").range(from,from+size-1);
+    if(error) throw error;
+    out.push(...data.map(rowToEntry)); if(data.length<size) break;
+  }
+  const {data:prof,error:pe}=await sb.from("profiles").select("*").eq("id",session.user.id).maybeSingle();
+  if(pe) throw pe;
+  if(!prof){ const {error:ie}=await sb.from("profiles").insert({id:session.user.id}); if(ie&&ie.code!=="23505") throw ie; }
+  ENTRIES=out; PROFILE=prof||{id:session.user.id, settings:{}, daily_goal:10, start_date:null};
+}
+let refreshing=null;
+async function refresh(){
+  if(!session||refreshing) return refreshing;
+  refreshing=(async()=>{ try{ await loadAll(); ready=true; applyTheme(); render(); }catch(e){ handleWriteError(e); } finally{ refreshing=null; } })();
+  return refreshing;
+}
+
+/* ---------- derived state ---------- */
+function profile(){ const st=(PROFILE&&PROFILE.settings)||{}; return {goal:(PROFILE&&PROFILE.daily_goal)||10, rule:st.rule||"one", theme:st.theme||{preset:"zen",mode:"auto"}, startDate:(PROFILE&&PROFILE.start_date)||null}; }
+function allEntries(){ return ENTRIES; }
+function dayCountsOf(all){ const c={}; for(const e of all) if(e.date) c[e.date]=(c[e.date]||0)+1; return c; }
+function nextNumber(all){ return all.length ? all[all.length-1].n+1 : 1; }
+function startDate(all){ const p=profile(); if(p.startDate) return p.startDate; const dated=all.filter(e=>e.date).map(e=>e.date).sort(); return dated[0]||tzNow(); }
+
+async function saveProfile(patch){
+  const settings={...((PROFILE&&PROFILE.settings)||{})}, upd={};
+  if("startDate" in patch) upd.start_date=patch.startDate;
+  if("goal" in patch) upd.daily_goal=patch.goal;
+  if("rule" in patch) settings.rule=patch.rule;
+  if("theme" in patch) settings.theme=patch.theme;
+  upd.settings=settings; upd.updated_at=new Date().toISOString();
+  PROFILE={...PROFILE, ...upd}; applyTheme(); render();
+  const {error}=await sb.from("profiles").upsert({id:session.user.id, ...upd}); if(error) throw error;
+}
+
+async function addEntry(text){
+  const all=allEntries(); const before=all.length; const today=tzNow();
+  const prof=profile(); const todayBefore=dayCountsOf(all)[today]||0;
+  const goalHit = todayBefore+1===prof.goal;
+  const n=nextNumber(all);
+  const temp={id:"tmp-"+Date.now(), n, t:text, date:today, src:"app"};
+  const echo=echoFor(text, [...all, temp]);
+  lastEcho = echo ? {...echo, n} : null;
+  ENTRIES=[...all, temp]; lastAdded=n; render();
+  const {data,error}=await sb.from("entries").insert({text, local_date:today}).select(COLS).single();
+  if(error){ ENTRIES=ENTRIES.filter(e=>e!==temp); lastEcho=null; render(); handleWriteError(error); return; }
+  const real=rowToEntry(data);
+  ENTRIES=ENTRIES.map(e=>e===temp?real:e).sort((a,b)=>a.n-b.n);
+  if(lastEcho) lastEcho.n=real.n;
+  if(!PROFILE.start_date) saveProfile({startDate:startDate(ENTRIES)}).catch(()=>{});
+  render();
+  const hit=crossed(before,before+1);
+  sound(goalHit?"jackpot":"small");
+  if(goalHit) celebrateGoal(prof.goal, dayCounter(startDate(all), today));
+  else if(hit.length) celebrate(hit[hit.length-1]);
+  if(goalHit && hit.length) setTimeout(()=>celebrate(hit[hit.length-1]), 4200);
+}
+async function editEntry(e, text){
+  const old=e.t; e.t=text; render();
+  const {error}=await sb.from("entries").update({text, edited_at:new Date().toISOString()}).eq("id",e.id);
+  if(error){ e.t=old; render(); handleWriteError(error); }
+}
+async function deleteEntry(e){
+  const keep=ENTRIES; ENTRIES=ENTRIES.filter(x=>x!==e); render();
+  const {error}=await sb.from("entries").update({deleted_at:new Date().toISOString()}).eq("id",e.id);
+  if(error){ ENTRIES=keep; render(); handleWriteError(error); }
+}
+function handleWriteError(e){
+  const offline = !navigator.onLine || /fetch|network/i.test((e&&e.message)||"");
+  toast(offline ? "You're offline. Reconnect and try again." : "That didn't save. Please try again.");
+  console.error(e);
+}
+
+/* ---------- sign in ---------- */
+function vAuth(){
+  if(!sb) return `<section class="panel"><h3>Can't connect right now</h3><p class="muted">Check your internet connection and reload the page.</p></section>`;
+  if(recovery) return `<header class="top"><div><span class="eyebrow">Gratitude Journal</span><div class="daycount">New password</div></div></header>
+    <form class="panel" id="pw-form"><div class="field"><label for="pw-new">Choose a new password</label><input id="pw-new" type="password" autocomplete="new-password" minlength="8" required></div>
+    <button class="btn primary" type="submit"${authBusy?" disabled":""}>Save password</button>${authMsg?`<p class="small">${esc(authMsg)}</p>`:""}</form>`;
+  const up=authMode==="signup", forgot=authMode==="forgot";
+  return `<header class="top"><div><span class="eyebrow">Ten things a day</span><div class="daycount">Gratitude Journal</div></div></header>
+  <section class="machine"><div class="machine-in">
+    ${lotus(up?3:7,10)}
+    <p class="muted" style="text-align:center">Write down ten things you're grateful for, every day.</p>
+  </div></section>
+  <form class="panel" id="auth-form">
+    <h3>${forgot?"Reset your password":up?"Create your account":"Sign in"}</h3>
+    <div class="field"><label for="auth-email">Email</label><input id="auth-email" type="email" autocomplete="email" autocapitalize="none" required></div>
+    ${forgot?"":`<div class="field"><label for="auth-pw">Password</label><input id="auth-pw" type="password" autocomplete="${up?"new-password":"current-password"}" minlength="${up?8:1}" required>${up?`<span class="small muted">At least 8 characters.</span>`:""}</div>`}
+    <button class="btn primary" type="submit"${authBusy?" disabled":""}>${forgot?"Email me a reset link":up?"Create account":"Sign in"}</button>
+    ${authMsg?`<p class="small" role="status">${esc(authMsg)}</p>`:""}
+    <div class="row">
+      ${up||forgot?`<button class="link" type="button" data-auth="signin">I have an account</button>`:`<button class="link" type="button" data-auth="signup">Create an account</button>`}
+      ${forgot?"":`<button class="link" type="button" data-auth="forgot">Forgot password?</button>`}
+    </div>
+  </form>`;
+}
+async function onAuthSubmit(ev){
+  ev.preventDefault();
+  const email=($("#auth-email")||{}).value?.trim(), pw=($("#auth-pw")||{}).value||"";
+  authBusy=true; authMsg=""; render();
+  const back=location.origin+location.pathname;
+  try{
+    if(authMode==="signup"){
+      const {data,error}=await sb.auth.signUp({email, password:pw, options:{emailRedirectTo:back}});
+      if(error) throw error;
+      authMsg = data.session ? "" : "Check your email and tap the confirmation link, then come back here to sign in.";
+      if(!data.session) authMode="signin";
+    }else if(authMode==="forgot"){
+      const {error}=await sb.auth.resetPasswordForEmail(email, {redirectTo:back}); if(error) throw error;
+      authMsg="If that email has an account, a reset link is on its way."; authMode="signin";
+    }else{
+      const {error}=await sb.auth.signInWithPassword({email, password:pw}); if(error) throw error;
+    }
+  }catch(e){
+    const m=(e&&e.message)||"";
+    authMsg = /invalid login/i.test(m) ? "That email and password don't match. Try again or reset your password."
+            : /not confirmed/i.test(m) ? "Please confirm your email first: tap the link we sent you."
+            : /already registered|already been registered/i.test(m) ? "That email already has an account. Sign in instead."
+            : /password/i.test(m) ? m
+            : "Something went wrong. Check your connection and try again.";
+  }
+  authBusy=false; render();
+}
+async function onPwSubmit(ev){
+  ev.preventDefault(); authBusy=true; render();
+  const {error}=await sb.auth.updateUser({password:$("#pw-new").value});
+  authBusy=false; if(error){ authMsg="That password didn't work. Use at least 8 characters."; render(); return; }
+  recovery=false; authMsg=""; toast("Password saved"); refresh();
+}
+
+/* ---------- theme ---------- */
+function hexToRgb(h){ h=h.replace("#",""); if(h.length===3) h=h.split("").map(c=>c+c).join(""); const n=parseInt(h,16); return [n>>16&255,n>>8&255,n&255]; }
+function rgbToHex(r){ return "#"+r.map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,"0")).join(""); }
+function lum(h){ return hexToRgb(h).map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4);}).reduce((a,v,i)=>a+v*[.2126,.7152,.0722][i],0); }
+function contrast(a,b){ const [x,y]=[lum(a),lum(b)].sort((p,q)=>q-p); return (x+.05)/(y+.05); }
+function mix(a,b,t){ const A=hexToRgb(a),B=hexToRgb(b); return rgbToHex(A.map((v,i)=>v+(B[i]-v)*t)); }
+function onColor(h){ return contrast(h,"#FFFFFF")>=contrast(h,"#16130F") ? "#FFFFFF" : "#16130F"; }
+function onGrad(g){ const w=Math.min(...g.map(c=>contrast(c,"#FFFFFF"))), d=Math.min(...g.map(c=>contrast(c,"#16130F"))); return w>=d?"#FFFFFF":"#16130F"; }
+function gradContrast(g){ const on=onGrad(g); return Math.min(...g.map(c=>contrast(c,on))); }
+function systemDark(){ const t=document.documentElement.getAttribute("data-theme"); if(t) return t==="dark"; return matchMedia("(prefers-color-scheme: dark)").matches; }
+function palette(theme, dark){
+  if(theme.preset==="custom" && theme.custom){
+    const c=theme.custom;
+    if(!dark) return {bg:c.bg,card:c.card,fg:c.fg||(lum(c.bg)>.4?"#2B231E":"#F1E8DC"),muted:mix(c.fg||"#3B2F28",c.bg,.4),line:mix(c.bg,c.fg||"#3B2F28",.12),accent:c.accent,g:c.g};
+    const bg=mix(c.bg,"#14110F",.86), card=mix(c.card,"#211C18",.82), fg="#EFE6DA";
+    return {bg,card,fg,muted:mix(fg,bg,.35),line:mix(bg,fg,.14),accent:mix(c.accent,"#FFFFFF",.3),g:c.g.map(x=>mix(x,"#FFFFFF",.25))};
+  }
+  const p=PRESETS[theme.preset]||PRESETS.zen; return dark?p.dark:p.light;
+}
+function applyTheme(){
+  const t=profile().theme||{preset:"zen",mode:"auto"};
+  const dark = t.mode==="dark" ? true : t.mode==="light" ? false : systemDark();
+  const p=palette(t,dark); const s=document.documentElement.style;
+  s.setProperty("--bg",p.bg); s.setProperty("--card",p.card); s.setProperty("--fg",p.fg); s.setProperty("--muted",p.muted);
+  s.setProperty("--line",p.line); s.setProperty("--accent",p.accent); s.setProperty("--on-accent",onGrad(p.g));
+  p.g.forEach((c,i)=>s.setProperty("--g"+(i+1),c)); if(p.g.length===2) s.setProperty("--g3",p.g[1]);
+  s.setProperty("color-scheme",dark?"dark":"light");
+  return {p,dark};
+}
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",()=>{ if(ready){applyTheme();} });
+new MutationObserver(()=>{ if(ready) applyTheme(); }).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+
+/* ---------- UI helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt=n=>n.toLocaleString("en-US");
+function fmtDate(iso){ const [y,m,d]=iso.split("-").map(Number); return new Date(y,m-1,d).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}); }
+let toastT; function toast(msg){ let t=$(".toast"); if(!t){t=document.createElement("div");t.className="toast";t.setAttribute("role","status");document.body.append(t);} t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,2600); }
+function overlay(html, label){
+  const el=document.createElement("div"); el.className="celebrate";
+  el.innerHTML=`<div class="box" role="dialog" aria-label="${label}"><div>${html}<button class="btn primary" data-close>Keep going</button></div></div>`;
+  document.body.append(el); el.querySelector("[data-close]").focus();
+  el.addEventListener("click",ev=>{ if(ev.target===el||ev.target.hasAttribute("data-close")) el.remove(); });
+}
+function celebrate(v){
+  overlay(`<span class="eyebrow">Milestone</span><div class="big num gold">${fmt(v)}</div><p>${fmt(v)} things you are grateful for, written down.</p>`,"Milestone reached");
+  confetti(90); sound("jackpot");
+}
+function celebrateGoal(goal, dn){
+  overlay(`<span class="eyebrow">Today's ${goal}, complete</span><div class="jack gold">Full bloom</div><p>${goal===10?"Ten":fmt(goal)} moments of gratitude today.</p><p class="small muted num">Day ${fmt(dn+1)} is waiting for you tomorrow.</p>`,"Daily goal complete");
+  confetti(100);
+}
+
+/* ---------- rolling numbers ---------- */
+function odometer(n, prev){
+  const s=fmt(n), from=prev==null?s:fmt(prev).padStart(s.length,"0");
+  let i=0, out="";
+  for(const ch of s){
+    if(ch===","){ out+=`<span class="comma">,</span>`; i++; continue; }
+    const f=/\d/.test(from[i])?Number(from[i]):0;
+    out+=`<span class="digit" aria-hidden="true"><span style="transform:translateY(-${f*1.5}em)" data-to="${ch}">${"0123456789".split("").map(d=>`<i>${d}</i>`).join("")}</span></span>`;
+    i++;
+  }
+  return out;
+}
+function rollOdometers(){
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    document.querySelectorAll(".digit span[data-to]").forEach(el=>{ el.style.transform=`translateY(-${Number(el.dataset.to)*1.5}em)`; });
+  }));
+}
+function countUp(el, from, to){
+  if(!el) return; if(from==null||from===to||matchMedia("(prefers-reduced-motion: reduce)").matches){ el.textContent=fmt(to); return; }
+  const t0=performance.now(), d=900;
+  (function step(t){ const k=Math.min(1,(t-t0)/d), e=1-Math.pow(1-k,3); el.textContent=fmt(Math.round(from+(to-from)*e)); if(k<1) requestAnimationFrame(step); })(t0);
+}
+
+/* ---------- sound (synthesized, plays only after a tap) ---------- */
+let actx=null;
+function soundOn(){ try{ return localStorage.getItem("ttj-sound")!=="off"; }catch(e){ return true; } }
+function tone(freq, start, dur, type="sine", vol=.05){
+  const o=actx.createOscillator(), g=actx.createGain(); o.type=type; o.frequency.value=freq;
+  const t=actx.currentTime+start; g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(vol,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(g).connect(actx.destination); o.start(t); o.stop(t+dur+.05);
+}
+function bell(freq, start, vol=.05, dur=2.2){ tone(freq,start,dur,"sine",vol); tone(freq*2.76,start,dur*.5,"sine",vol*.25); tone(freq*5.4,start,dur*.25,"sine",vol*.1); }
+const PENTA=[523.25,587.33,659.25,783.99,880,1046.5];
+function sound(kind){
+  if(!soundOn()) return;
+  try{ actx = actx || new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==="suspended") actx.resume(); }catch(e){ return; }
+  if(kind==="spin"){ for(let i=0;i<9;i++) tone(PENTA[Math.floor(Math.random()*PENTA.length)], i*.16, .5, "sine", .022); }
+  if(kind==="stop") tone(196,0,.25,"sine",.05);
+  if(kind==="small") bell(784,0,.045,1.6);
+  if(kind==="pair"){ bell(659.25,0,.045,1.8); bell(987.77,.18,.04,1.8); }
+  if(kind==="jackpot"){ bell(130.81,0,.06,4.5); bell(196,.02,.035,4); [523.25,659.25,783.99,1046.5,1318.5].forEach((f,i)=>bell(f,.25+i*.18,.035,2.4)); }
+}
+
+/* ---------- confetti ---------- */
+function confetti(count=120){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  let c=document.getElementById("confetti"); if(!c){ c=document.createElement("canvas"); c.id="confetti"; document.body.append(c); }
+  const dpr=window.devicePixelRatio||1, W=innerWidth, H=innerHeight; c.width=W*dpr; c.height=H*dpr; c.style.width=W+"px"; c.style.height=H+"px";
+  const x=c.getContext("2d"); x.setTransform(dpr,0,0,dpr,0,0);
+  const cs=getComputedStyle(document.documentElement); const cols=["--g1","--g2","--g3"].map(v=>cs.getPropertyValue(v).trim()||"#C3B5E0");
+  const ps=Array.from({length:count},()=>({x:Math.random()*W,y:-20-Math.random()*H*.6,vy:.8+Math.random()*1.4,sway:Math.random()*Math.PI*2,sw:.6+Math.random()*1.2,r:6+Math.random()*7,a:Math.random()*6,va:(Math.random()-.5)*.04,c:cols[Math.floor(Math.random()*cols.length)]}));
+  const t0=performance.now(), life=6;
+  (function frame(t){
+    x.clearRect(0,0,W,H); const age=(t-t0)/1000;
+    for(const p of ps){ p.sway+=.02; p.y+=p.vy; p.x+=Math.sin(p.sway)*p.sw; p.a+=p.va;
+      x.save(); x.translate(p.x,p.y); x.rotate(p.a); x.globalAlpha=Math.max(0,Math.min(1,(life-age)/1.5))*.9; x.fillStyle=p.c;
+      x.beginPath(); x.ellipse(0,0,p.r,p.r*.5,0,0,Math.PI*2); x.fill(); x.restore(); }
+    if(age<life) requestAnimationFrame(frame); else x.clearRect(0,0,W,H);
+  })(t0);
+}
+
+/* ---------- the slot drawer ---------- */
+let slotTimer=null;
+function runSlot(roll, base, mult, done){
+  let el=document.getElementById("slot");
+  if(!el){ el=document.createElement("div"); el.id="slot"; el.className="slot"; el.setAttribute("role","status"); document.body.append(el); }
+  const reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const strip=(target,len)=>{ const arr=[]; for(let i=0;i<len;i++) arr.push(SYMBOLS[Math.floor(Math.random()*6)]); arr.push(SYMBOLS[target]); return arr; };
+  const lens=[14,20,26];
+  el.innerHTML=`<div class="slot-in"><div class="reels">${roll.reels.map((r,i)=>`<div class="reel"><div class="strip" data-len="${lens[i]}">${strip(r,lens[i]).map(sy=>`<i class="${sy===SYMBOLS[5]?"lotus":""}">${sy}</i>`).join("")}</div></div>`).join("")}</div><div class="payout" id="payout">&nbsp;</div></div>`;
+  clearTimeout(slotTimer);
+  requestAnimationFrame(()=>{ el.classList.add("show");
+    el.querySelectorAll(".strip").forEach((s,i)=>{ const len=Number(s.dataset.len); s.style.transition=reduced?"none":`transform ${1.2+i*0.45}s cubic-bezier(.22,1,.36,1)`; requestAnimationFrame(()=>{ s.style.transform=`translateY(-${len*72}px)`; }); });
+  });
+  sound("spin");
+  const total=reduced?50:2100+350;
+  if(!reduced) [1150,1600,2050].forEach(t=>setTimeout(()=>sound("stop"),t));
+  setTimeout(()=>{
+    const pay=document.getElementById("payout"); if(!pay) return;
+    const label={mega:"Triple lotus",jackpot:"Jackpot",pair:"A pair",none:""}[roll.kind];
+    pay.innerHTML=`${label?`<span class="win glow">${label}</span> · `:""}<span class="num">+${fmt(base+roll.bonus)}</span><small>${roll.bonus?`${fmt(base)} for the entry + ${fmt(roll.bonus)} bonus`:`streak multiplier x${mult.toFixed(1)}`}</small>`;
+    sound(roll.kind==="none"?"small":roll.kind==="pair"?"pair":"jackpot");
+    if(roll.kind==="jackpot"||roll.kind==="mega") confetti(roll.kind==="mega"?110:70);
+    slotTimer=setTimeout(()=>el.classList.remove("show"), roll.kind==="none"?2200:3200);
+    done&&setTimeout(done, roll.kind==="none"?500:1200);
+  }, total);
+}
+
+let lastAdded=null, shownPoints=null, shownNumber=null, lastEcho=null;
+let _wi=null, _wiKey="", wordMode=false, wordLabel="";
+function wordIndex(){ const all=allEntries(); const k=all.length+":"+(all.length?all[all.length-1].n:0)+":"+all.reduce((a,e)=>a+e.t.length,0); if(k!==_wiKey){ _wi=buildWordIndex(all); _wiKey=k; } return _wi; }
+let tab="today", editing=null, confirmDel=null, menuFor=null, bucket=null, query="", page=1, importPreview=null, confirmWipe=false, draft="";
+document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{ tab=b.dataset.tab; editing=null; confirmDel=null; render(); window.scrollTo(0,0); }));
+
+function itemRow(e, opts={}){
+  const key=e.src+":"+e.n;
+  if(editing===key) return `<div class="item"><span class="n">#${fmt(e.n)}</span><textarea id="edit-input" rows="2" autocapitalize="none" aria-label="Edit entry ${e.n}">${esc(e.t)}</textarea><span class="acts"><button class="link" data-act="save" data-k="${key}">Save</button></span></div>`;
+  const t = opts.hl ? highlight(e.t, opts.hl) : esc(e.t);
+  const acts = confirmDel===key
+    ? `<button class="link danger" data-act="del-yes" data-k="${key}">Delete</button><button class="link" data-act="del-no">Keep</button>`
+    : `<button class="more" data-act="menu" data-k="${key}" aria-label="Options for entry ${e.n}" aria-haspopup="menu" aria-expanded="${menuFor===key}">&#8943;</button>${menuFor===key?`<div class="menu" role="menu"><button role="menuitem" data-act="edit" data-k="${key}">Edit</button><button role="menuitem" class="danger" data-act="del" data-k="${key}">Delete</button></div>`:""}`;
+  const when = opts.showDate ? `<div class="small muted">${e.date?fmtDate(e.date):"Imported"}</div>` : "";
+  const words = topWordsIn(e.t, wordIndex()).map(w=>`<button class="wc" data-word="${esc(w.key)}" data-label="${esc(w.word)}" title="${fmt(w.count)} entries mention ${esc(w.word)}">${esc(w.word)} <b class="num">${fmt(w.count)}</b></button>`).join("");
+  return `<div class="item"><span class="n">#${fmt(e.n)}</span><div class="t"><em>I am grateful for</em> ${t}${words?`<div class="wcs">${words}</div>`:""}${when}</div><span class="acts">${acts}</span></div>`;
+}
+function highlight(text,q){ const i=text.toLowerCase().indexOf(q.toLowerCase()); if(i<0) return esc(text); return esc(text.slice(0,i))+"<mark>"+esc(text.slice(i,i+q.length))+"</mark>"+esc(text.slice(i+q.length)); }
+
+/* ---------- views ---------- */
+const SPROUT=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21v-8" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" fill="none"/><path d="M12 13c0-4 3-7 8-7 0 4-3 7-8 7z" fill="var(--g1)"/><path d="M12 15c0-3.4-2.6-6-7-6 0 3.4 2.6 6 7 6z" fill="var(--g2)"/></svg>`;
+
+function lotus(c, goal){
+  const n=Math.min(Math.max(goal,1),20);
+  const petals=Array.from({length:n},(_,i)=>`<g transform="rotate(${(i*360/n).toFixed(2)} 100 100)"><path class="petal${i<c?" on":""}${i===c-1&&lastAdded?" new":""}" d="M100 96 C 85 76, 86 44, 100 20 C 114 44, 115 76, 100 96 Z"/></g>`).join("");
+  return `<svg class="lotus${c>=goal?" full":""}" viewBox="0 0 200 200" role="img" aria-label="${c} of ${goal} today"><defs><linearGradient id="petg" x1="0" y1="1" x2="0" y2="0"><stop offset="0" class="s1"/><stop offset=".6" class="s2"/><stop offset="1" class="s3"/></linearGradient></defs>${petals}<circle cx="100" cy="100" r="25" class="core"/><text x="100" y="98" class="ln">${Math.min(c,999)}</text><text x="100" y="114" class="ls">OF ${goal}</text></svg>`;
+}
+function echoHtml(today){
+  if(!lastEcho) return "";
+  const e=lastEcho;
+  if(e.count<=1) return `<div class="echo"><span class="echo-ic" aria-hidden="true">✿</span><div><strong>A first.</strong> You've never written about “${esc(e.word)}” before.</div></div>`;
+  return `<div class="echo"><span class="echo-ic" aria-hidden="true">✿</span><div><strong>Your ${ordinal(e.count)} time grateful for ${esc(e.word)}.</strong>${e.first&&e.first.n!==e.n?`<span class="small muted">The first was #${fmt(e.first.n)}: “${esc(e.first.t.length>90?e.first.t.slice(0,88).replace(/\s+\S*$/,"")+"…":e.first.t)}”</span>`:""}<button class="link" data-word="${esc(e.key)}" data-label="${esc(e.word)}">See all ${fmt(e.count)}</button></div></div>`;
+}
+function roadHtml(total, counts, today, compact){
+  const r=roadTo(total, counts, today), pct=Math.min(100,total/r.target*100);
+  return `<section class="panel road"><div class="meta"><h3>Road to ${fmt(r.target)}</h3><span class="num"><strong>${fmt(total)}</strong> <span class="muted">/ ${fmt(r.target)}</span></span></div>
+    <div class="trail"><i style="width:${pct}%"></i><b style="left:${pct}%"></b></div>
+    <p class="small muted num">${fmt(r.remaining)} to go${r.eta?` · at your pace of ${r.pace.toFixed(1)} a day, you'll get there around <strong>${fmtDate(r.eta)}</strong>`:""}.${compact?"":" Each day you hit 10 brings that date closer."}</p></section>`;
+}
+
+function vToday(all){
+  const p=profile(), today=tzNow(), counts=dayCountsOf(all), st=computeStats(counts,today,p.goal,p.rule);
+  const todays=all.filter(e=>e.date===today);
+  const c=todays.length, left=Math.max(0,p.goal-c), sd=startDate(all), dn=Math.max(1,dayCounter(sd,today));
+  const nn=nextNumber(all);
+  const prevN = shownNumber; shownNumber = nn;
+  return `
+  <header class="top">
+    <div><span class="eyebrow">${fmtDate(today)} · since ${fmtDate(sd)}</span><div class="daycount num">Day ${fmt(dn)}</div></div>
+    <div class="flame" title="${st.current}-day streak">${SPROUT}<div><b class="num">${fmt(st.current)}</b><br><span>day streak</span></div></div>
+  </header>
+  <section class="machine"><div class="machine-in">
+    ${lotus(c, p.goal)}
+    <p class="small num" style="text-align:center"><strong>${left>0?`${left} more for full bloom`:`Full bloom today`}</strong>${left>0?"":" · extra entries still count"}</p>
+    <div class="odo" aria-label="Next entry number ${fmt(nn)}"><span class="lab">no.</span>${odometer(nn, prevN)}</div>
+    <label class="prefix" for="entry">I am grateful for</label>
+    <form class="entryrow" id="entry-form"><textarea id="entry" rows="2" autocomplete="off" autocapitalize="none" spellcheck="true" enterkeyhint="send" placeholder="the people around me…">${esc(draft)}</textarea><button class="go" type="submit">Add</button></form>
+    ${echoHtml(today)}
+  </div></section>
+  ${roadHtml(all.length, counts, today, true)}
+  <section class="panel">
+    <div class="meta"><h3>Today</h3><span class="small muted num">${c} ${c===1?"entry":"entries"}</span></div>
+    ${todays.length?`<div class="list">${todays.slice().reverse().map(e=>itemRow(e)).join("")}</div>`:`<p class="muted">Nothing yet today. Your first entry will be #${fmt(nn)}.</p>`}
+  </section>
+`;
+}
+
+function vBrowse(all){
+  if(!all.length) return `<h2>Browse</h2><p class="muted">Your entries will collect here, grouped by the thousand. Add one on Today, or bring in an old list from Settings.</p>`;
+  const maxN=all[all.length-1].n, buckets=Math.ceil(maxN/1000);
+  if(bucket===null||bucket>=buckets) bucket=buckets-1;
+  let list, header;
+  if(query.trim()){
+    const q=query.trim().toLowerCase();
+    const hits=(wordMode ? all.filter(e=>tokens(e.t).some(t=>t.key===q)) : all.filter(e=>e.t.toLowerCase().includes(q))).slice().reverse();
+    list=hits.slice(0,200); header=`<span class="small muted num">${fmt(hits.length)} ${hits.length===1?"entry":"entries"}${wordMode?` mention “${esc(wordLabel)}”`:" match"}${hits.length>200?" · newest 200 shown":""}</span>`;
+    return `<h2>Browse</h2><input class="search" id="search" type="search" placeholder="Search every entry" value="${esc(query)}">${header}
+      <section class="panel"><div class="list">${list.map(e=>itemRow(e,{hl:query.trim(),showDate:true})).join("")||`<p class="muted">No entries mention that yet.</p>`}</div></section>`;
+  }
+  const inB=all.filter(e=>Math.floor((e.n-1)/1000)===bucket);
+  const shown=inB.slice(0,page*100);
+  const chips=Array.from({length:buckets},(_,i)=>`<button class="chip" data-bucket="${i}" aria-pressed="${i===bucket}">${fmt(i*1000+1)}–${fmt((i+1)*1000)}</button>`).join("");
+  return `<h2>Browse</h2><input class="search" id="search" type="search" placeholder="Search every entry" value="">
+    <div class="chips" role="group" aria-label="Entry ranges">${chips}</div>
+    <section class="panel"><div class="meta"><h3 class="num">${fmt(bucket*1000+1)}–${fmt((bucket+1)*1000)}</h3><span class="small muted num">${fmt(inB.length)} entries</span></div>
+    <div class="list">${shown.map(e=>itemRow(e,{showDate:true})).join("")||`<p class="muted">No entries in this range.</p>`}</div>
+    ${inB.length>shown.length?`<button class="btn" data-act="more">Show 100 more</button>`:""}</section>`;
+}
+
+function vProgress(all){
+  const p=profile(), today=tzNow(), counts=dayCountsOf(all), st=computeStats(counts,today,p.goal,p.rule), total=all.length;
+  const nm=nextMilestone(total), prevM=[0,...milestoneList(total)].filter(v=>v<=total).pop()||0;
+  const pct=Math.min(100,(total-prevM)/(nm-prevM)*100);
+  // last 14 days, oldest on the left, today on the right
+  const days=Array.from({length:14},(_,i)=>{ const iso=addDays(today,i-13); return {iso, c:counts[iso]||0}; });
+  const scale=Math.max(p.goal, ...days.map(d=>d.c));
+  const WD=["S","M","T","W","T","F","S"];
+  const bars=days.map(d=>`<div class="col${d.iso===today?" today":""}"><div class="b${d.c>=p.goal?" full":d.c===0?" zero":""}" style="height:${Math.max(2,d.c/scale*100)}%" title="${fmtDate(d.iso)}: ${d.c} ${d.c===1?"entry":"entries"}"><span>${d.c}</span></div></div>`).join("");
+  const labels=days.map(d=>{ const dt=new Date(dayNum(d.iso)*86400000); return `<span class="${d.iso===today?"today":""}">${WD[dt.getUTCDay()]}<br>${dt.getUTCDate()}</span>`; }).join("");
+  const sum14=days.reduce((a,d)=>a+d.c,0), hit14=days.filter(d=>d.c>=p.goal).length;
+  const ms=milestoneList(total).filter(v=>v<=Math.max(10000,nm));
+  const idx=wordIndex(), top=[...idx.entries()].sort((a,b)=>b[1]-a[1]).slice(0,12);
+  const label=k=>{ const e=all.slice().reverse().find(x=>tokens(x.t).some(t=>t.key===k)); const tk=e&&tokens(e.t).find(t=>t.key===k); return tk?tk.raw:k; };
+  return `<h2>Progress</h2>
+  ${roadHtml(total, counts, today, false)}
+  <div class="stats">
+    <div class="stat"><span class="eyebrow">Current streak</span><b>${st.current}</b><span class="small muted">${st.current===1?"day":"days"} ${p.rule==="goal"?`with all ${p.goal}`:"in a row"}</span></div>
+    <div class="stat"><span class="eyebrow">Best streak</span><b>${st.best}</b><span class="small muted">${st.best===1?"day":"days"}</span></div>
+    <div class="stat"><span class="eyebrow">Days journaled</span><b>${fmt(st.days)}</b><span class="small muted">with an entry</span></div>
+    <div class="stat"><span class="eyebrow">Full days</span><b>${fmt(st.full)}</b><span class="small muted">${p.goal} of ${p.goal}</span></div>
+  </div>
+  <section class="panel">
+    <div class="meta"><h3>Next milestone</h3><span class="num"><strong>${fmt(total)}</strong> <span class="muted">/ ${fmt(nm)}</span></span></div>
+    <div class="bar"><i style="width:${pct}%"></i></div>
+    <p class="small muted num">${fmt(nm-total)} more to reach ${fmt(nm)}.</p>
+  </section>
+  <section class="panel"><div class="meta"><h3>Last 14 days</h3><span class="small muted num">${fmt(sum14)} entries · ${hit14} of 14 days hit ${p.goal}</span></div>
+    <div><div class="bars"><div class="goal-line" style="bottom:${p.goal/scale*100}%"><span>Goal ${p.goal}</span></div>${bars}</div><div class="dlabels">${labels}</div></div>
+    <p class="small muted num">Average ${(sum14/14).toFixed(1)} a day</p></section>
+  <section class="panel"><h3>Badges</h3><div class="badges">${ms.map(v=>`<div class="badge${total>=v?" got":""}"><b>${v>=10000?fmt(v/1000)+"k":fmt(v)}</b><span>${total>=v?"Won":"Ahead"}</span></div>`).join("")}</div></section>
+  ${top.length?`<section class="panel"><h3>What you're most grateful for</h3><div class="wcs">${top.map(([k,c])=>{ const w=label(k); return `<button class="wc" data-word="${esc(k)}" data-label="${esc(w)}">${esc(w)} <b class="num">${fmt(c)}</b></button>`; }).join("")}</div><p class="small muted">Tap one to read every entry that mentions it.</p></section>`:""}`;
+}
+
+function vSettings(all){
+  const p=profile(), t=p.theme||{preset:"zen",mode:"auto"}, sd=startDate(all);
+  const custom=t.custom||{bg:"#F3EEE6",card:"#FBF8F3",fg:"#3B2F28",accent:"#5B7083",g:["#5B7083","#5B795B","#8D6E63"]};
+  const {p:pal}=applyTheme();
+  const cBody=contrast(pal.fg,pal.bg), cBtn=gradContrast(pal.g);
+  const warn=(cBody<4.5||cBtn<4.5)?`<p class="note">Some text may be hard to read with these colors (contrast ${Math.min(cBody,cBtn).toFixed(1)}:1, the target is 4.5:1). <button class="link" data-act="fix-contrast">Fix it for me</button></p>`:"";
+  const sw=Object.entries(PRESETS).map(([k,v])=>`<button class="sw" data-preset="${k}" aria-pressed="${t.preset===k}"><span style="background:linear-gradient(90deg,${v.light.g.join(",")})"></span>${v.name}</button>`).join("")+
+    `<button class="sw" data-preset="custom" aria-pressed="${t.preset==="custom"}"><span style="background:linear-gradient(90deg,${custom.g.join(",")})"></span>Custom</button>`;
+  return `<h2>Settings</h2>
+  <section class="panel">
+    <h3>Journal</h3>
+    <div class="field"><label for="s-start">Start date (Day 1)</label><input type="date" id="s-start" value="${sd}"></div>
+    <div class="field"><label for="s-goal">Daily goal</label><input type="number" id="s-goal" min="1" max="50" value="${p.goal}" inputmode="numeric"></div>
+    <div class="field"><label>A streak day needs</label><div class="seg" role="group"><button data-rule="one" aria-pressed="${p.rule==="one"}">1 entry</button><button data-rule="goal" aria-pressed="${p.rule==="goal"}">All ${p.goal}</button></div></div>
+    <p class="small muted">Days follow this device's clock (${esc(Intl.DateTimeFormat().resolvedOptions().timeZone||"local time")}).</p>
+  </section>
+  <section class="panel">
+    <h3>Appearance</h3>
+    <div class="seg" role="group" aria-label="Light or dark">${["auto","light","dark"].map(m=>`<button data-mode="${m}" aria-pressed="${t.mode===m}">${m==="auto"?"Match device":m[0].toUpperCase()+m.slice(1)}</button>`).join("")}</div>
+    <div class="swatches">${sw}</div>
+    <div class="field"><label>Sounds</label><div class="seg" role="group" aria-label="Sounds"><button data-sound="on" aria-pressed="${soundOn()}">On</button><button data-sound="off" aria-pressed="${!soundOn()}">Off</button></div></div>
+    ${t.preset==="custom"?`<div class="colors">
+      ${[["bg","Background",custom.bg],["card","Cards",custom.card],["fg","Text",custom.fg||"#3B2F28"],["accent","Accent",custom.accent],["g0","Gradient 1",custom.g[0]],["g1","Gradient 2",custom.g[1]],["g2","Gradient 3",custom.g[2]||custom.g[1]]]
+        .map(([k,l,v])=>`<label><input type="color" id="c-${k}" data-color="${k}" value="${v}">${l}</label>`).join("")}
+    </div>`:""}
+    ${warn}
+    <div class="row"><button class="btn" data-act="reset-theme">Reset to default</button></div>
+  </section>
+  <section class="panel">
+    <h3>Bring in past entries</h3>
+    <p class="small muted">Choose a backup file from your old journal (it keeps every number and date), or paste a list with one entry per line. Numbers like "12." and the words "I am grateful for" are removed automatically.</p>
+    <div class="row"><label class="btn primary" for="imp-file" style="cursor:pointer">Choose a backup or .txt file</label><input type="file" id="imp-file" accept=".json,.txt,application/json,text/plain" hidden></div>
+    <div class="field"><label for="imp-text">Or paste a list</label><textarea id="imp-text" placeholder="1. I am grateful for my family&#10;2. I am grateful for a warm coffee"></textarea></div>
+    <div class="row"><button class="btn" data-act="imp-check">Check list</button></div>
+    ${importPreview?`<div class="note">${importHtml()}<div class="row" style="margin-top:8px"><button class="btn primary" data-act="imp-go"${importing?" disabled":""}>${importing?`Importing… ${importing}`:`Import ${fmt(importPreview.items.length)}`}</button><button class="btn" data-act="imp-cancel">Cancel</button></div></div>`:""}
+  </section>
+  <section class="panel">
+    <h3>Your data</h3>
+    <p class="small muted num">${fmt(all.length)} entries saved to your account.</p>
+    <div class="row"><button class="btn" data-act="export-txt">Export as text</button><button class="btn" data-act="export-json">Export backup</button></div>
+    ${confirmWipe?`<div class="field"><label for="wipe">Type DELETE to erase every entry and setting</label><input id="wipe" autocomplete="off"></div><div class="row"><button class="btn danger" data-act="wipe-go">Erase everything</button><button class="btn" data-act="wipe-no">Cancel</button></div>`
+                 :`<div class="row"><button class="btn danger" data-act="wipe">Erase my journal</button></div>`}
+    <p class="small muted">Reminders, family sharing and subscriptions come with the phone app.</p>
+  </section>
+  <section class="panel">
+    <h3>Account</h3>
+    <p class="small muted">Signed in as <strong>${esc(session.user.email||"")}</strong>. Your entries are private to this account.</p>
+    <div class="row"><button class="btn" data-act="signout">Sign out</button></div>
+  </section>`;
+}
+
+function render(){
+  const tabs=document.querySelector(".tabs");
+  if(!session||recovery){ tabs.hidden=true; $("#app").innerHTML=vAuth(); return; }
+  if(!ready){ tabs.hidden=true; $("#app").innerHTML=`<p class="notice">Opening your journal…</p>`; return; }
+  tabs.hidden=false;
+  const all=allEntries();
+  const focusId=document.activeElement&&document.activeElement.id;
+  const caret=focusId&&document.activeElement.selectionStart;
+  $("#app").innerHTML = tab==="today"?vToday(all):tab==="browse"?vBrowse(all):tab==="progress"?vProgress(all):vSettings(all);
+  document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===tab?"page":"false"));
+  if(focusId && document.getElementById(focusId)){ const el=document.getElementById(focusId); el.focus(); try{ if(caret!=null) el.setSelectionRange(caret,caret);}catch(e){} }
+  if(editing){ const ei=$("#edit-input"); if(ei){ ei.focus(); ei.setSelectionRange(ei.value.length,ei.value.length); } }
+  document.querySelectorAll("#entry,#edit-input").forEach(autoGrow);
+  rollOdometers();
+  const ptsEl=document.getElementById("pts");
+  if(ptsEl){ const to=Number(ptsEl.dataset.to); countUp(ptsEl, shownPoints, to); shownPoints=to; }
+  lastAdded=null;
+}
+
+/* ---------- events ---------- */
+function autoGrow(el){ if(!el||CSS.supports("field-sizing","content")) return; el.style.height="auto"; el.style.height=el.scrollHeight+2+"px"; }
+function findEntry(key){ const [src,n]=key.split(":"); return allEntries().find(e=>e.src===src&&e.n===Number(n)); }
+document.addEventListener("submit",async ev=>{
+  if(ev.target.id!=="entry-form") return; ev.preventDefault();
+  const inp=$("#entry"); const v=smartLower(inp.value.replace(/\s+/g," ").trim(), allEntries()); if(!v) return;
+  draft=""; inp.value=""; autoGrow(inp); inp.focus();
+  await addEntry(v); const i=$("#entry"); if(i) i.focus();
+});
+document.addEventListener("input",ev=>{
+  const id=ev.target.id;
+  if(id==="entry"){ draft=ev.target.value; autoGrow(ev.target); }
+  if(id==="edit-input") autoGrow(ev.target);
+  if(id==="search"){ query=ev.target.value; wordMode=false; page=1; render(); }
+});
+document.addEventListener("keydown",ev=>{
+  if(ev.target.id==="entry" && ev.key==="Enter" && !ev.shiftKey && !ev.isComposing){ ev.preventDefault(); $("#entry-form").requestSubmit(); }
+  if(ev.target.id==="edit-input"){ if(ev.key==="Enter"&&!ev.shiftKey){ ev.preventDefault(); $('[data-act="save"]').click(); } if(ev.key==="Escape"){ editing=null; render(); } }
+});
+let colorT=null;
+document.addEventListener("change",async ev=>{
+  const el=ev.target, id=el.id, p=profile();
+  try{
+    if(id==="s-start" && el.value) await saveProfile({startDate:el.value});
+    if(id==="s-goal"){ const g=Math.max(1,Math.min(50,parseInt(el.value,10)||10)); await saveProfile({goal:g}); }
+    if(id==="imp-file" && el.files[0]){ const txt=await el.files[0].text(); importPreview=readImport(txt); if(!importPreview) toast("No entries found in that file"); el.value=""; render(); }
+  }catch(e){ handleWriteError(e); }
+});
+document.addEventListener("input",ev=>{
+  const k=ev.target.dataset&&ev.target.dataset.color; if(!k) return;
+  const t={...(profile().theme||{})}; const c=JSON.parse(JSON.stringify(t.custom||{bg:"#F3EEE6",card:"#FBF8F3",fg:"#3B2F28",accent:"#5B7083",g:["#5B7083","#5B795B","#8D6E63"]}));
+  if(k.startsWith("g")) c.g[Number(k[1])]=ev.target.value; else c[k]=ev.target.value;
+  t.custom=c; t.preset="custom";
+  PROFILE={...PROFILE,settings:{...((PROFILE&&PROFILE.settings)||{}),theme:t}}; applyTheme();     // live preview
+  clearTimeout(colorT); colorT=setTimeout(()=>{ saveProfile({theme:t}).catch(handleWriteError); },500);
+});
+document.addEventListener("click",async ev=>{
+  if(menuFor && !ev.target.closest(".menu") && !ev.target.closest('[data-act="menu"]')){ menuFor=null; render(); }
+  const b=ev.target.closest("button"); if(!b || b.closest(".tabs")) return;
+  const act=b.dataset.act, p=profile();
+  try{
+    if(b.dataset.bucket!==undefined){ bucket=Number(b.dataset.bucket); page=1; render(); return; }
+    if(b.dataset.word){ query=b.dataset.word; wordLabel=b.dataset.label||b.dataset.word; wordMode=true; page=1; tab="browse"; editing=null; menuFor=null; render(); window.scrollTo(0,0); return; }
+    if(b.dataset.sound){ try{ localStorage.setItem("ttj-sound",b.dataset.sound); }catch(e){} if(b.dataset.sound==="on") sound("small"); render(); return; }
+    if(b.dataset.rule){ await saveProfile({rule:b.dataset.rule}); return; }
+    if(b.dataset.mode){ await saveProfile({theme:{...(p.theme||{}),mode:b.dataset.mode}}); return; }
+    if(b.dataset.preset){ const t={...(p.theme||{}),preset:b.dataset.preset}; if(b.dataset.preset==="custom"&&!t.custom) t.custom={bg:"#F3EEE6",card:"#FBF8F3",fg:"#3B2F28",accent:"#5B7083",g:["#5B7083","#5B795B","#8D6E63"]}; await saveProfile({theme:t}); return; }
+    switch(act){
+      case "menu": menuFor = menuFor===b.dataset.k ? null : b.dataset.k; confirmDel=null; render(); break;
+      case "edit": editing=b.dataset.k; confirmDel=null; menuFor=null; render(); break;
+      case "save": { const e=findEntry(b.dataset.k); const v=smartLower($("#edit-input").value.replace(/\s+/g," ").trim(), allEntries()); editing=null; if(e&&v&&v!==e.t) await editEntry(e,v); render(); break; }
+      case "del": confirmDel=b.dataset.k; editing=null; menuFor=null; render(); break;
+      case "del-no": confirmDel=null; render(); break;
+      case "del-yes": { const e=findEntry(b.dataset.k); confirmDel=null; if(e) await deleteEntry(e); toast(`Entry #${e?fmt(e.n):""} removed`); break; }
+      case "more": page++; render(); break;
+      case "reset-theme": await saveProfile({theme:{preset:"zen",mode:"auto"}}); toast("Colors reset"); break;
+      case "fix-contrast": {
+        const t=JSON.parse(JSON.stringify(p.theme)); const {dark}=applyTheme();
+        if(t.preset==="custom"&&t.custom){ const c=t.custom;           let i=0; while(i<20 && contrast(c.fg||"#3B2F28",c.bg)<4.5){ c.fg=mix(c.fg||"#3B2F28",lum(c.bg)>.4?"#000000":"#FFFFFF",.15); i++; }
+          c.g=c.g.map(x=>{ let k=0; while(k<40 && contrast(x,"#FFFFFF")<4.6){ x=mix(x,"#000000",.04); k++; } return x; });
+          await saveProfile({theme:t}); toast("Colors adjusted for readability"); }
+        break; }
+      case "imp-check": { importPreview=readImport($("#imp-text").value); if(!importPreview) toast("No entries found in that text"); render(); break; }
+      case "signout": await sb.auth.signOut(); break;
+      case "imp-cancel": importPreview=null; render(); break;
+      case "imp-go": await runImport(); break;
+      case "export-txt": exportFile("txt"); break;
+      case "export-json": exportFile("json"); break;
+      case "wipe": confirmWipe=true; render(); break;
+      case "wipe-no": confirmWipe=false; render(); break;
+      case "wipe-go": { if(($("#wipe").value||"").trim()!=="DELETE"){ toast("Type DELETE to confirm"); return; }
+        const {error}=await sb.from("entries").delete().eq("user_id",session.user.id); if(error) throw error;
+        confirmWipe=false; ENTRIES=[]; lastEcho=null; toast("Journal erased"); render(); break; }
+    }
+  }catch(e){ handleWriteError(e); }
+});
+
+// A backup from the old journal (JSON) keeps numbers and dates; a plain list gets new numbers.
+let importing="";
+function readImport(text){
+  const s=text.trim(); if(!s) return null;
+  if(s[0]==="{"){
+    try{
+      const j=JSON.parse(s); const rows=(j.entries||[]).filter(e=>e&&e.text&&Number.isInteger(e.n??e.number));
+      if(!rows.length) return null;
+      return {kind:"backup", items:rows.map(e=>({n:e.n??e.number, t:String(e.text).slice(0,2000), date:/^\d{4}-\d{2}-\d{2}$/.test(e.date||"")?e.date:null})), profile:j.profile||{}};
+    }catch(e){ return null; }
+  }
+  const list=parseImport(s); return list.length ? {kind:"list", items:list.map(t=>({t:t.slice(0,2000), date:null}))} : null;
+}
+function importHtml(){
+  const p=importPreview, it=p.items, first=it[0], last=it[it.length-1];
+  if(p.kind==="backup"){
+    const dated=it.filter(x=>x.date).length, have=new Set(ENTRIES.map(e=>e.n)), dup=it.filter(x=>have.has(x.n)).length;
+    return `<strong>${fmt(it.length)} entries</strong> in this backup (#${fmt(first.n)} to #${fmt(last.n)}), ${fmt(dated)} with dates.${dup?` ${fmt(dup)} are already in your account and will be skipped.`:""}${p.profile.startDate?` Day 1 will be ${fmtDate(p.profile.startDate)}.`:""}`;
+  }
+  const base=nextNumber(ENTRIES);
+  return `<strong>${fmt(it.length)} entries</strong> found. They'll be numbered #${fmt(base)} to #${fmt(base+it.length-1)}. First: "${esc(first.t)}". Last: "${esc(last.t)}".`;
+}
+async function runImport(){
+  const p=importPreview; if(!p||importing) return;
+  const before=ENTRIES.length, uid=session.user.id;
+  let rows;
+  if(p.kind==="backup"){ const have=new Set(ENTRIES.map(e=>e.n)); rows=p.items.filter(x=>!have.has(x.n)).map(x=>({user_id:uid, number:x.n, text:x.t, local_date:x.date, source:"import"})); }
+  else { const base=nextNumber(ENTRIES); rows=p.items.map((x,i)=>({user_id:uid, number:base+i, text:x.t, local_date:null, source:"import"})); }
+  try{
+    for(let i=0;i<rows.length;i+=500){
+      importing=`${fmt(Math.min(i+500,rows.length))} of ${fmt(rows.length)}`; render();
+      const {error}=await sb.from("entries").upsert(rows.slice(i,i+500), {onConflict:"user_id,number", ignoreDuplicates:true});
+      if(error) throw error;
+    }
+    if(p.kind==="backup"){
+      const patch={};
+      if(p.profile.startDate && !PROFILE.start_date) patch.startDate=p.profile.startDate;
+      if(p.profile.goal && PROFILE.daily_goal===10 && p.profile.goal!==10) patch.goal=p.profile.goal;
+      if(Object.keys(patch).length) await saveProfile(patch);
+    }
+  }catch(e){ importing=""; handleWriteError(e); await refresh(); return; }
+  importing=""; importPreview=null; const ta=$("#imp-text"); if(ta) ta.value="";
+  await refresh();
+  toast(`${fmt(ENTRIES.length-before)} entries imported`);
+  const hit=crossed(before,ENTRIES.length); if(hit.length) celebrate(hit[hit.length-1]);
+}
+
+function exportFile(kind){
+  const all=allEntries(); if(!all.length){ toast("Nothing to export yet"); return; }
+  const stamp=tzNow(), p=profile();
+  const data = kind==="txt"
+    ? all.map(e=>`${e.n}. I am grateful for ${e.t}${e.date?`  (${e.date})`:""}`).join("\n")+"\n"
+    : JSON.stringify({exported:stamp, profile:{startDate:p.startDate, goal:p.goal}, entries:all.map(({n,t,date})=>({n,text:t,date}))},null,2);
+  const url=URL.createObjectURL(new Blob([data],{type:kind==="txt"?"text/plain":"application/json"}));
+  const a=document.createElement("a"); a.href=url; a.download=`gratitude-journal-${stamp}.${kind}`; document.body.append(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),4000); toast("Saved");
+}
+
+async function boot(){
+  if(!sb){ render(); return; }
+  const {data}=await sb.auth.getSession(); session=data.session;
+  sb.auth.onAuthStateChange((event, s)=>{
+    const was=session&&session.user.id; session=s;
+    if(event==="PASSWORD_RECOVERY"){ recovery=true; render(); return; }
+    if(!s){ ENTRIES=[]; PROFILE=null; ready=false; lastEcho=null; tab="today"; authMode="signin"; render(); return; }
+    authMode="signin"; authMsg="";
+    if(s.user.id!==was) refresh();
+  });
+  if(session) await refresh(); else render();
+}
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible" && session && !editing && !importing) refresh(); });
+document.addEventListener("submit",ev=>{ if(ev.target.id==="auth-form") onAuthSubmit(ev); if(ev.target.id==="pw-form") onPwSubmit(ev); });
+document.addEventListener("click",ev=>{ const b=ev.target.closest("[data-auth]"); if(b){ authMode=b.dataset.auth; authMsg=""; render(); } });
+
+boot();
+setInterval(()=>{ if(ready && tab==="today" && !document.activeElement?.value) render(); },60000); // roll over at midnight
+</script>
+</body>
+</html>
