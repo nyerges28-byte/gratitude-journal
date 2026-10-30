@@ -397,7 +397,7 @@ function smartLower(text, all){
 const SUPABASE_URL="https://eribqzvxavpzdfnmlcnv.supabase.co";
 const SUPABASE_KEY="sb_publishable_NTpuXE8SACwPEYh6IAqV7g_VwErNLVd";   // public by design; privacy comes from row-level security
 const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {auth:{persistSession:true, autoRefreshToken:true, detectSessionInUrl:true}}) : null;
-let session=null, ENTRIES=[], PROFILE=null, ready=false, recovery=false;
+let session=null, ENTRIES=[], PROFILE=null, ready=false, recovery=false, loadError="";
 let authMode="signin", authMsg="", authBusy=false;
 
 const tzNow=()=>new Date().toLocaleDateString("en-CA");
@@ -418,7 +418,7 @@ async function loadAll(){
 let refreshing=null;
 async function refresh(){
   if(!session||refreshing) return refreshing;
-  refreshing=(async()=>{ try{ await loadAll(); ready=true; applyTheme(); render(); }catch(e){ handleWriteError(e); } finally{ refreshing=null; } })();
+  refreshing=(async()=>{ try{ await loadAll(); ready=true; loadError=""; applyTheme(); render(); }catch(e){ console.error(e); if(!ready){ loadError=[e&&e.message, e&&e.code&&`code ${e.code}`].filter(Boolean).join(" · ")||"no response from the server"; render(); } else handleWriteError(e); } finally{ refreshing=null; } })();
   return refreshing;
 }
 
@@ -855,7 +855,9 @@ function vSettings(all){
 function render(){
   const tabs=document.querySelector(".tabs");
   if(!session||recovery){ tabs.hidden=true; $("#app").innerHTML=vAuth(); return; }
-  if(!ready){ tabs.hidden=true; $("#app").innerHTML=`<p class="notice">Opening your journal…</p>`; return; }
+  if(!ready){ tabs.hidden=true; $("#app").innerHTML = loadError
+      ? `<section class="panel"><h3>Couldn't open your journal</h3><p class="small muted">${esc(loadError)}</p><div class="row"><button class="btn primary" data-act="retry">Try again</button><button class="btn" data-act="signout">Sign out</button></div></section>`
+      : `<p class="notice">Opening your journal…</p>`; return; }
   tabs.hidden=false;
   const all=allEntries();
   const focusId=document.activeElement&&document.activeElement.id;
@@ -935,6 +937,7 @@ document.addEventListener("click",async ev=>{
         break; }
       case "imp-check": { importPreview=readImport($("#imp-text").value); if(!importPreview) toast("No entries found in that text"); render(); break; }
       case "signout": await sb.auth.signOut(); break;
+      case "retry": loadError=""; render(); await refresh(); break;
       case "imp-cancel": importPreview=null; render(); break;
       case "imp-go": await runImport(); break;
       case "export-txt": exportFile("txt"); break;
